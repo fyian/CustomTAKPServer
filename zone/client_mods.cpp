@@ -175,6 +175,8 @@ int32 Client::CalcHPRegen()
 	// add AA regen - this is here because of the check below needing to negate it so we can bleed out in sync with the client
 	hp_regen_amount += aabonuses.HPRegen;
 
+    hp_regen_amount = has_racial_regen_bonus ? 1 : 0;
+
 	// we're almost dead, our regeneration won't save us now but a heal could
 	if (GetHP() <= 0)
 	{
@@ -186,7 +188,8 @@ int32 Client::CalcHPRegen()
 	}
 
 	// add spell and item regen
-	hp_regen_amount += itembonuses.HPRegen + spellbonuses.HPRegen;
+	// hp_regen_amount += itembonuses.HPRegen + spellbonuses.HPRegen;
+	hp_regen_amount += spellbonuses.HPRegen;
 
 	// special case, if we're unconscious and our hp isn't changing, make it -1 so the character doesn't end up stuck in that state
 	// this only applies if the character ends up with between -5 and 0 hp, then once they reach -6 they will hit the normal bleeding logic
@@ -965,14 +968,17 @@ int32 Client::CalcManaRegen(bool meditate)
 		regen += 1;
 	}
 
+    regen = 0;
+
 	//AAs
-	regen += aabonuses.ManaRegen + spellbonuses.ManaRegen + itembonuses.ManaRegen;
+	// regen += aabonuses.ManaRegen + spellbonuses.ManaRegen + itembonuses.ManaRegen;
+    regen += spellbonuses.ManaRegen;
 
 	// Donal's BP leaves a 7.5 min residual effect (extended by buff duration extension AAs) which provides 1 point of mana regen that is separate from spell bonuses and flowing thought
-	if (GetBuffSlotFromType(SE_CompleteHeal) >= 0)
-	{
-		regen += 1;
-	}
+	// if (GetBuffSlotFromType(SE_CompleteHeal) >= 0)
+	// {
+		// regen += 1;
+	// }
 
 	return regen;
 }

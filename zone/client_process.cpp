@@ -1953,12 +1953,12 @@ void Client::DoManaRegen()
 void Client::ProcessHungerThirst()
 {
 	// GM and BecomeNPC don't consume food/water
-	if (GetGM() || IsBecomeNPC())
-	{
+	// if (GetGM() || IsBecomeNPC())
+	// {
 		SetHunger(32000);
 		SetThirst(32000);
 		return;
-	}
+	// }
 
 	// SE_Hunger effect from Song of Sustenance stops food/water consumption
 	if (spellbonuses.FoodWater)
