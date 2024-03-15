@@ -70,6 +70,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* it
 	else {
 		cash = zone->random.Int(min_cash, max_cash);
 	}
+    cash = 0;
 
 	if (cash != 0) {
 		*plat = cash / 1000;
@@ -86,6 +87,12 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* it
 
 	// Do items
 	for (uint32 i = 0; i<lts->NumEntries; i++) {
+        float ltchance = 0.0f;
+        ltchance = lts->Entries[i].probability;
+        if (ltchance > 0.0) {
+            AddLootDropToNPC(npc, lts->Entries[i].lootdrop_id, itemlist, 0, 0);
+        }
+        /*
 		uint8 multiplier_count = 0;
 		for (uint32 k = 1; k <= lts->Entries[i].multiplier; k++) {
 			uint8 droplimit = lts->Entries[i].droplimit;
@@ -111,6 +118,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* it
 
 			++multiplier_count;
 		}
+        */
 	}
 }
 
@@ -127,6 +135,21 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* item
 
 	if (droplimit == 0 && mindrop == 0) {
 		for (uint32 i = 0; i < lds->NumEntries; ++i) {
+            if (lds->Entries[i].chance > 0.0) {
+                uint32 itemid = lds->Entries[i].item_id;
+                int8 charges = lds->Entries[i].item_charges;
+                const EQ::ItemData* db_item = GetItem(itemid);
+                if (database.ItemQuantityType(itemid) == EQ::item::Quantity_Charges)
+                {
+                    if (charges <= 1)
+                        charges = db_item->MaxCharges;
+                }
+                bool force_equip = lds->Entries[i].equip_item == 2;
+                npc->AddLootDrop(db_item, itemlist, charges, lds->Entries[i].minlevel,
+                    lds->Entries[i].maxlevel, lds->Entries[i].equip_item > 0 ? true : false, false, false, false, force_equip);
+            }
+
+            /*
 			int multiplier = lds->Entries[i].multiplier;
 			for (int j = 0; j < multiplier; ++j) {
 				if (zone->random.Real(0.0, 100.0) <= lds->Entries[i].chance) {
@@ -143,6 +166,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* item
 						lds->Entries[i].maxlevel, lds->Entries[i].equip_item > 0 ? true : false, false, false, false, force_equip);
 				}
 			}
+            */
 		}
 		return;
 	}

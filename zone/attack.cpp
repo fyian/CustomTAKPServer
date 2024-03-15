@@ -847,6 +847,7 @@ bool Client::Attack(Mob* other, int hand, int damagePct)
 	int baseDamage = GetBaseDamage(other, hand);
 
 	// anti-twink damage caps.  Taken from decompiles
+    /*
 	if (mylevel < 10)
 	{
 		switch (GetClass())
@@ -935,6 +936,8 @@ bool Client::Attack(Mob* other, int hand, int damagePct)
 				baseDamage = 60;
 		}
 	}
+    */
+
 	/*
 	// these are in the decompile but so unrealistic, commenting them out for cycles
 	// also caps GM weapons
@@ -4518,10 +4521,12 @@ int Client::GetMitigation(bool ignoreCap, int item_ac_sum, int shield_ac, int sp
 	}
 
 	// anti-twink
+    /*
 	if (!ignoreCap && level < 50 && acSum > (level * 6 + 25))
 	{
 		acSum = level * 6 + 25;
 	}
+    */
 
 	if (playerClass == MONK)
 	{

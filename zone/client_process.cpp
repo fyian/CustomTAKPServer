@@ -1945,7 +1945,7 @@ void Client::DoManaRegen()
 	{
 		int32 old_mana = GetMana();
 		SetMana(GetMana() + CalcManaRegen(true));
-		if (GetMana() != old_mana)
+		//if (GetMana() != old_mana)
 			SendManaUpdatePacket();
 	}
 }

@@ -763,6 +763,8 @@ bool Mob::CheckFizzle(uint16 spell_id)
 
 bool Client::CheckFizzle(uint16 spell_id)
 {
+    return(true);
+
 	// GMs don't fizzle
 	if (GetGM()) return(true);
 

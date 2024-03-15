@@ -261,7 +261,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	}
 
 	//handle caps
-	if (spec->nofail)
+	if (isTrivialCombine || spec->nofail)
 	{
 		chance = 100;
 	}
@@ -404,6 +404,7 @@ void Client::CheckIncreaseTradeskill(bool isSuccessfulCombine, EQ::skills::Skill
 	Log(Logs::General, Logs::Tradeskills, "...Attemping Skill-Up; Combine Success: %s, Player Raw Skill Level: %i, INT: %d, WIS: %d, DEX: %d, STR: %d, Difficulty: %0.1f, statCheck: %0.1f",
 		isSuccessfulCombine ? "yes" : "no", rawSkill, GetINT(), GetWIS(), GetDEX(), GetSTR(), tradeDifficulty, statCheck);
 
+    /*
 	if (statCheck > zone->random.Real(1, 1000))
 	{
 		Log(Logs::Detail, Logs::Tradeskills, "...Stat check success; Attempting Skill Check.  Success chance: %0.1f pct", 
@@ -413,12 +414,14 @@ void Client::CheckIncreaseTradeskill(bool isSuccessfulCombine, EQ::skills::Skill
 		// Skill caps at 190 here, leaving a 5% chance to succeed when skill >= 190
 		if (rawSkill <= 15 || zone->random.Int(1, 200) > std::min(190, rawSkill))
 		{
+        */
 			SetSkill(tradeskill, rawSkill + 1);
 
 			if (title_manager.IsNewTradeSkillTitleAvailable(tradeskill, rawSkill + 1))
 				NotifyNewTitlesAvailable();
 
 			Log(Logs::Detail, Logs::Tradeskills, "...Tradeskill skill-up success.  New skill == %i", rawSkill + 1);
+        /*
 		}
 		else
 		{
@@ -429,6 +432,7 @@ void Client::CheckIncreaseTradeskill(bool isSuccessfulCombine, EQ::skills::Skill
 	{
 		Log(Logs::Detail, Logs::Tradeskills, "...Failed tradeskill skill-up first roll");
 	}
+    */
 }
 
 bool ZoneDatabase::GetTradeRecipe(const EQ::ItemInstance* container, uint8 c_type, uint32 some_id,

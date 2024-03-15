@@ -1378,6 +1378,9 @@ const int32& Client::SetMana(int32 amount) {
 }
 
 void Client::SendManaUpdatePacket() {
+    SendManaUpdate();
+
+    /*
 	if (!Connected() || IsCasting())
 		return;
 
@@ -1387,6 +1390,7 @@ void Client::SendManaUpdatePacket() {
 
 		last_reported_mana = cur_mana;
 	}
+    */
 }
 
 // sends mana update to self
@@ -1897,6 +1901,8 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 		Log(Logs::General, Logs::Skills, "Skill %d at value %d %s. difficulty: %0.2f", skillid, skillval, in_success == SKILLUP_SUCCESS ? "succeeded" : "failed", difficulty);
 		float stat = GetSkillStat(skillid);
 		float skillup_modifier = RuleR(Skills, SkillUpModifier);
+
+        return true;
 
 		if(difficulty < 1)
 			difficulty = 1.0f;
