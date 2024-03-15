@@ -1556,14 +1556,14 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 void Client::SetGM(bool toggle) {
 	m_pp.gm = toggle ? 1 : 0;
 	Message(CC_Red, "You are %s a GM.", m_pp.gm ? "now" : "no longer");
-	SendAppearancePacket(AT_GM, m_pp.gm);
+	SendAppearancePacket(AppearanceType::GM, m_pp.gm);
 	Save();
 	UpdateWho();
 }
 
 void Client::SetAnon(bool toggle) {
 	m_pp.anon = toggle ? 1 : 0;
-	SendAppearancePacket(AT_Anon, m_pp.anon);
+	SendAppearancePacket(AppearanceType::Anonymous, m_pp.anon);
 	Save();
 	UpdateWho();
 }
@@ -2189,7 +2189,7 @@ void Client::SetPVP(bool toggle) {
 	else
 		Message(CC_Red, "You no longer follow the ways of discord.");
 
-	SendAppearancePacket(AT_PVP, GetPVP());
+	SendAppearancePacket(AppearanceType::PVP, GetPVP());
 	Save();
 }
 
@@ -2856,7 +2856,7 @@ void Client::LinkDead()
 	}
 //	save_timer.Start(2500);
 	linkdead_timer.Start(RuleI(Zone,ClientLinkdeadMS));
-	SendAppearancePacket(AT_Linkdead, 1);
+	SendAppearancePacket(AppearanceType::Linkdead, 1);
 	client_distance_timer.Disable();
 	client_state = CLIENT_LINKDEAD;
 	AI_Start();
@@ -2871,7 +2871,7 @@ void Client::Escape()
 	if (GetClass() == ROGUE)
 	{
 		sneaking = true;
-		SendAppearancePacket(AT_Sneak, sneaking);
+		SendAppearancePacket(AppearanceType::Sneak, sneaking);
 		if (GetAA(aaShroudofStealth))
 		{
 			improved_hidden = true;
@@ -4120,7 +4120,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = database.GetNPCType(pet.npc_id);
+	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
 	if(npc_type == nullptr) {
 		Log(Logs::General, Logs::Error, "Unknown npc type for doppelganger spell id: %d", spell_id);
 		Message(CC_Default,"Unable to find pet!");

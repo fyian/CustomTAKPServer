@@ -909,7 +909,7 @@ bool Database::GetVariable(std::string varname, std::string &varvalue)
 	return false;
 }
 
-bool Database::SetVariable(const std::string varname, const std::string &varvalue)
+bool Database::SetVariable(const std::string& varname, const std::string &varvalue)
 {
 	std::string escaped_name = Strings::Escape(varname);
 	std::string escaped_value = Strings::Escape(varvalue);
@@ -970,22 +970,19 @@ bool Database::GetSafePoints(const char* short_name, float* safe_x, float* safe_
 	{
 		uint8 zone_expansion = atoi(row[7]);
 		if(zone_expansion == 1)
-			*expansion = ClassicEQ;
-
-		else if(zone_expansion == 2)
 			*expansion = KunarkEQ;
 
-		else if(zone_expansion == 3)
+		else if(zone_expansion == 2)
 			*expansion = VeliousEQ;
 
-		else if(zone_expansion == 4)
+		else if(zone_expansion == 3)
 			*expansion = LuclinEQ;
 
-		else if(zone_expansion == 5)
+		else if(zone_expansion == 4)
 			*expansion = PlanesEQ;
 
 		else
-			*expansion = 0;
+			*expansion = ClassicEQ;
 	}
 
 	return true;
@@ -1444,7 +1441,7 @@ uint16 Database::MoveCharacterToBind(uint32 CharID)
 
 bool Database::SetHackerFlag(const char* accountname, const char* charactername, const char* hacked) { 
 	std::string new_hacked = std::string(hacked);
-	replace_all(new_hacked, "'", "_");
+	Strings::FindReplace(new_hacked, "'", "_");
 	std::string query = StringFormat("INSERT INTO `hackers` (account, name, hacked) values('%s','%s','%s')", accountname, charactername, new_hacked.c_str());
 	auto results = QueryDatabase(query);
 
@@ -1458,7 +1455,7 @@ bool Database::SetHackerFlag(const char* accountname, const char* charactername,
 bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) { 
 	//Utilize the "hacker" table, but also give zone information.
 	std::string new_hacked = std::string(hacked);
-	replace_all(new_hacked, "'", "_");
+	Strings::FindReplace(new_hacked, "'", "_");
 	std::string query = StringFormat("INSERT INTO hackers(account,name,hacked,zone) values('%s','%s','%s','%s')", accountname, charactername, new_hacked.c_str(), zone);
 	auto results = QueryDatabase(query);
 
