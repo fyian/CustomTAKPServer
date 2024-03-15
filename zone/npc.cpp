@@ -173,6 +173,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	CHA = d->CHA;
 	npc_mana = d->Mana;
 
+
 	//quick fix of ordering if they screwed it up in the DB
 	if (max_dmg < min_dmg) {
 		int tmp = min_dmg;
@@ -223,6 +224,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	roambox_delay = 1000;
 	p_depop = false;
 	loottable_id = d->loottable_id;
+	skip_global_loot = d->skip_global_loot;
+	rare_spawn = d->rare_spawn;
 
 	primary_faction = 0;
 	SetNPCFactionID(d->npc_faction_id);
@@ -721,7 +724,8 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 
 void NPC::SpawnGridNodeNPC(const glm::vec4& position, int32 grid_number, int32 zoffset)
 {
-	NPCType* npc_type = database.GetNPCTypeTemp(RuleI(NPC, NPCTemplateID));
+	auto npc_type = new NPCType;
+	memset(npc_type, 0, sizeof(NPCType));
 
 	std::string str_zoffset = Strings::NumberToWords(zoffset);
 	std::string str_number = Strings::NumberToWords(grid_number);
@@ -891,7 +895,8 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		}
 
 		//Time to create the NPC!!
-		NPCType* npc_type = database.GetNPCTypeTemp(RuleI(NPC, NPCTemplateID));
+		auto npc_type = new NPCType;
+		memset(npc_type, 0, sizeof(NPCType));
 
 		strncpy(npc_type->name, sep.arg[0], 60);
 		npc_type->cur_hp = atoi(sep.arg[4]);
@@ -1509,7 +1514,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 void NPC::SetLevel(uint8 in_level, bool command)
 {
 	level = in_level;
-	SendAppearancePacket(AT_WhoLevel, in_level);
+	SendAppearancePacket(AppearanceType::WhoLevel, in_level);
 }
 
 void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
@@ -1846,23 +1851,23 @@ void NPC::DoNPCEmote(uint8 event_, uint16 emoteid, Mob* target)
 	}
 
 	std::string processed = nes->text;
-	replace_all(processed, "$mname", GetCleanName());
-	replace_all(processed, "$mracep", GetRaceIDNamePlural(GetRace()));
-	replace_all(processed, "$mrace", GetRaceIDName(GetRace()));
-	replace_all(processed, "$mclass", GetClassIDName(GetClass()));
+	Strings::FindReplace(processed, "$mname", GetCleanName());
+	Strings::FindReplace(processed, "$mracep", GetRaceIDNamePlural(GetRace()));
+	Strings::FindReplace(processed, "$mrace", GetRaceIDName(GetRace()));
+	Strings::FindReplace(processed, "$mclass", GetClassIDName(GetClass()));
 	if (target)
 	{
-		replace_all(processed, "$name", target->GetCleanName());
-		replace_all(processed, "$racep", GetRaceIDNamePlural(target->GetRace()));
-		replace_all(processed, "$race", GetRaceIDName(target->GetRace()));
-		replace_all(processed, "$class", GetClassIDName(target->GetClass()));
+		Strings::FindReplace(processed, "$name", target->GetCleanName());
+		Strings::FindReplace(processed, "$racep", GetRaceIDNamePlural(target->GetRace()));
+		Strings::FindReplace(processed, "$race", GetRaceIDName(target->GetRace()));
+		Strings::FindReplace(processed, "$class", GetClassIDName(target->GetClass()));
 	}
 	else
 	{
-		replace_all(processed, "$name", "foe");
-		replace_all(processed, "$racep", "races");
-		replace_all(processed, "$race", "race");
-		replace_all(processed, "$class", "class");
+		Strings::FindReplace(processed, "$name", "foe");
+		Strings::FindReplace(processed, "$racep", "races");
+		Strings::FindReplace(processed, "$race", "race");
+		Strings::FindReplace(processed, "$class", "class");
 	}
 
 	if(emoteid == nes->emoteid)

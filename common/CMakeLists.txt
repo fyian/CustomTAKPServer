@@ -5,6 +5,7 @@ SET(common_sources
 	classes.cpp
 	cli/eqemu_command_handler.cpp
 	condition.cpp
+	content/world_content_service.cpp
 	crash.cpp
 	crc16.cpp
 	crc32.cpp
@@ -60,6 +61,7 @@ SET(common_sources
 	rdtsc.cpp
 	rulesys.cpp
 	say_link.cpp
+	server_event_scheduler.cpp
 	sha1.cpp
 	shareddb.cpp
 	skills.cpp
@@ -94,9 +96,11 @@ SET(common_sources
 )
 
 SET(repositories
+    # Criteria
+    repositories/criteria/content_filter_criteria.h
+
 	# Base Repositories
 	repositories/base/base_blocked_spells_repository.h
-	repositories/base/base_bug_reports_repository.h
 	repositories/base/base_bugs_repository.h
 	repositories/base/base_char_create_combinations_repository.h
 	repositories/base/base_char_create_point_allocations_repository.h
@@ -120,6 +124,7 @@ SET(repositories
 	repositories/base/base_character_spells_repository.h
 	repositories/base/base_character_timers_repository.h
 	repositories/base/base_character_zone_flags_repository.h
+	repositories/base/base_content_flags_repository.h
 	repositories/base/base_damageshieldtypes_repository.h
 	repositories/base/base_discovered_items_repository.h
 	repositories/base/base_doors_repository.h
@@ -170,6 +175,7 @@ SET(repositories
 	repositories/base/base_rule_sets_repository.h
 	repositories/base/base_rule_values_repository.h
 	repositories/base/base_saylink_repository.h
+	repositories/base/base_server_scheduled_events_repository.h
 	repositories/base/base_skill_caps_repository.h
 	repositories/base/base_spawn_condition_values_repository.h
 	repositories/base/base_spawn_conditions_repository.h
@@ -190,7 +196,6 @@ SET(repositories
 	repositories/base/base_zone_repository.h
 	repositories/base/base_aa_actions_repository.h
 	repositories/base/base_aa_effects_repository.h
-	repositories/base/base_aa_required_level_cost_repository.h
 	repositories/base/base_account_flags_repository.h
 	repositories/base/base_account_ip_repository.h
 	repositories/base/base_account_repository.h
@@ -199,7 +204,6 @@ SET(repositories
 	repositories/base/base_base_data_repository.h
 	
 	# Extended Repositories
-	repositories/bug_reports_repository.h
 	repositories/bugs_repository.h
 	repositories/char_create_combinations_repository.h
 	repositories/char_create_point_allocations_repository.h
@@ -223,6 +227,7 @@ SET(repositories
 	repositories/character_spells_repository.h
 	repositories/character_timers_repository.h
 	repositories/character_zone_flags_repository.h
+	repositories/content_flags_repository.h
 	repositories/damageshieldtypes_repository.h
 	repositories/discovered_items_repository.h
 	repositories/doors_repository.h
@@ -273,6 +278,7 @@ SET(repositories
 	repositories/rule_sets_repository.h
 	repositories/rule_values_repository.h
 	repositories/saylink_repository.h
+	repositories/server_scheduled_events_repository.h
 	repositories/skill_caps_repository.h
 	repositories/spawn_condition_values_repository.h
 	repositories/spawn_conditions_repository.h
@@ -293,7 +299,6 @@ SET(repositories
 	repositories/zone_repository.h
 	repositories/aa_actions_repository.h
 	repositories/aa_effects_repository.h
-	repositories/aa_required_level_cost_repository.h
 	repositories/account_flags_repository.h
 	repositories/account_ip_repository.h
 	repositories/account_repository.h
@@ -313,8 +318,10 @@ SET(common_headers
 	cli/argh.h
 	cli/eqemu_command_handler.h
 	cli/terminal_color.hpp
+	cron/croncpp.h
 	database/database_dump_service.h
 	condition.h
+	content/world_content_service.h
 	crash.h
 	crc16.h
 	crc32.h
@@ -396,12 +403,13 @@ SET(common_headers
 	ruletypes.h
 	say_link.h
 	seperator.h
+	server_event_scheduler.h
 	servertalk.h
 	sha1.h
 	shareddb.h
 	skills.h
 	spdat.h
-    strings.h
+    	strings.h
 	struct_strategy.h
 	textures.h
 	tcp_basic_server.h
