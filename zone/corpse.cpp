@@ -459,11 +459,16 @@ Corpse::Corpse(Client* client, int32 in_rezexp, uint8 in_killedby) : Mob (
 		if(!IsEmpty()) {
 			corpse_decay_timer.Start(RuleI(Character, CorpseDecayTimeMS));
 		}
+        else {
+			corpse_decay_timer.Start(30000);
+        }
+        /*
 		else if (IsEmpty() && RuleB(Character, SacrificeCorpseDepop) && killedby == Killed_Sac &&
 			(GetZoneID() == poknowledge || GetZoneID() == nexus || GetZoneID() == bazaar))
 		{
 			corpse_decay_timer.Start(180000);
 		}
+        */
 		return;
 	} //end "not leaving naked corpses"
 

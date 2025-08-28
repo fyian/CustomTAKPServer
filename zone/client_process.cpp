@@ -1153,6 +1153,98 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, float x,
 		return;
 	}
 
+    bool canAccept = true;
+    int rezStrength = spells[SpellID].base[0];
+    int level = GetLevel();
+    float healPercent = 0.0f;
+    int addHeal = 1;
+    int addSpell = 0;
+    if (rezStrength == 0) { // CLR 14 / PAL 22
+        if (level > 29) {
+            canAccept = false;
+        }
+
+        if (level < 19) {
+            addHeal = 100;
+        } else {
+            addHeal = 33;
+        }
+    } else if (rezStrength == 10) { // CLR 19 / PAL 30
+        if (level > 34) {
+            canAccept = false;
+        }
+
+        addHeal = 100;
+    } else if (rezStrength == 20) { // CLR 24 / PAL 35
+        if (level > 38) {
+            canAccept = false;
+        }
+
+        if (level < 29) {
+            addHeal = 300;
+        } else if (level < 39) {
+            addHeal = 100;
+        }
+    } else if (rezStrength == 35) { // CLR 29 / PAL 39
+        if (level > 48) {
+            canAccept = false;
+        }
+
+        addHeal = 300;
+    } else if (rezStrength == 50) { // CLR 34 / PAL 49
+        if (level > 54) {
+            canAccept = false;
+        }
+
+        if (level < 39) {
+            addHeal = 583;
+        } else if (level < 54) {
+            addHeal = 300;
+        }
+    } else if (rezStrength == 60) { // CLR 39
+        if (level > 54) {
+            canAccept = false;
+        }
+
+        if (level < 44) {
+            addHeal = 0;
+            healPercent = 100.0f;
+        } else {
+            addHeal = 300;
+        }
+    } else if (rezStrength == 75) { // CLR 44 / PAL 55
+        if (level > 58) {
+            canAccept = false;
+        }
+
+        if (level < 49) {
+            addHeal = 0;
+            healPercent = 100.0f;
+        } else if (level < 59) {
+            addHeal = 300;
+        }
+    } else if (rezStrength == 90) { // CLR 49 / PAL 59
+        if (level < 56)
+        {
+            addHeal = 0;
+            healPercent = 100.0f;
+        } else {
+            addHeal = 583;
+        }
+    } else if (rezStrength == 96) { // CLR 56
+        addHeal = 0;
+        healPercent = 100.0f;
+    } else if (rezStrength == 93) { // NEC 53
+        addHeal = 215;
+        addSpell = 2467; //BOND OF DEATH RECOURSE
+    }
+
+    if (!canAccept)
+    {
+		Message(CC_Red, "This spell is too weak to revive you!\n");
+        return;
+    }
+
 	if (Action == 1)
 	{
 		// Mark the corpse as rezzed in the database, just in case the corpse has buried, or the zone the
@@ -1163,28 +1255,29 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, float x,
 				SpellID, ZoneID);
 
 		this->BuffFadeNonPersistDeath();
+
 		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
 		// Rez spells with Rez effects have this DescNum
 		if(SpellEffectDescNum == 39067) {
-			SetMana(0);
-			SetHP(GetMaxHP()/5);
-			if(!GetGM())
-				SpellOnTarget(SPELL_RESURRECTION_EFFECTS, this); // Rezz effects
+            SetMana(PendingRezzXP); //Using PendingRezzXP to hold mana level at death
+
+            SetHP((int)(GetMaxHP() * healPercent) + addHeal);
 		}
 		else {
 			SetMana(GetMaxMana());
 			SetHP(GetMaxHP());
 		}
-		if(spells[SpellID].base[0] < 100 && spells[SpellID].base[0] > 0 && PendingRezzXP > 0)
-		{
-				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base[0])))),
-						GetAAXP(),true);
-		}
-		else if (spells[SpellID].base[0] == 100 && PendingRezzXP > 0) {
-			SetEXP((GetEXP() + PendingRezzXP), GetAAXP(), true);
-		}
 
 		entity_list.RemoveFromTargets(this);
+
+        auto new_corpse = new Corpse(this, 0, Killed_Other);
+        entity_list.AddCorpse(new_corpse, GetID());
+        SetID(0);
+        SetCorpseID(new_corpse->GetID()); // save id for sending damage packets
+
+        if (addSpell > 0) {
+            SpellOnTarget(addSpell, this);
+        }
 
 		//Was sending the packet back to initiate client zone...
 		//but that could be abusable, so lets go through proper channels
