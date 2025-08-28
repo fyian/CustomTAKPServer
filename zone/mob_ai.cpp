@@ -1298,6 +1298,7 @@ void Mob::AI_Process() {
 
 	if (is_engaged)
 	{
+        Mob* old_target = GetTarget();
 		if (IsRooted() && !permarooted && !IsMezzed() && !IsStunned())
 		{
 			Mob* closest_client = hate_list.GetClosestClient(this);
@@ -1322,6 +1323,13 @@ void Mob::AI_Process() {
 		{
 			SetTarget(hate_list.GetTop());
 		}
+
+        Mob* new_target = GetTarget();
+        if (old_target != new_target)
+        {
+            // Store last target and see if we changed targets. If so, set target destination position to our current position.
+            m_LastKnownTargetPosition = glm::vec3(m_Position.x, m_Position.y, m_Position.z);
+        }
 	}
 
 	if (is_engaged && GetTarget() && !IsEngaged())
@@ -1445,33 +1453,37 @@ void Mob::AI_Process() {
 			}
 		}
 
+        glm::vec3 my_loc(m_Position.x, m_Position.y, m_Position.z);
+        glm::vec3 tar_pos(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
+        bool has_los = zone->zonemap->CheckLoS(my_loc, tar_pos);
+
 		bool is_combat_range = IsInCombatRange(GetTarget());
 		if (is_combat_range && IsMoving()) {
 			// this is for mobs that might still be pathing to get LOS
-			glm::vec3 my_loc(m_Position.x, m_Position.y, m_Position.z);
-			glm::vec3 tar_pos(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
-			bool has_los = zone->zonemap->CheckLoS(my_loc, tar_pos);
 			if (!has_los && Distance(my_loc, tar_pos) > 14.0f)
 				is_combat_range = false;
 		} else if (!is_combat_range) {
 			// this is for when target is high above
 			if ((std::abs(m_Position.x - GetTarget()->GetX()) < 2.0f) && (std::abs(m_Position.y - GetTarget()->GetY()) < 2.0f)) {
 				// this is for mobs that might still be pathing to get LOS
-				glm::vec3 my_loc(m_Position.x, m_Position.y, m_Position.z);
-				glm::vec3 tar_pos(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
-				if (zone->zonemap->CheckLoS(my_loc, tar_pos))
+				if (has_los)
 					is_combat_range = true;
 			}
 		}
+
+        // If target is in LoS and visible to us, store target's loc to member var to use as destination to run to
+        bool target_visible = !IsInvisible(cur_tar);
+        if (has_los && (target_visible || is_combat_range))
+        {
+            m_LastKnownTargetPosition = tar_pos;
+        }
+
 		if (is_combat_range)
 		{
 			if (IsMoving()) {
 				FaceTarget(GetTarget());
 				facing_set = true;
 				
-				glm::vec3 my_loc(m_Position.x, m_Position.y, m_Position.z);
-				glm::vec3 tar_pos(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
-				bool has_los = zone->zonemap->CheckLoS(my_loc, tar_pos);
 				if (!has_los && !GetTarget()->IsMoving()) {
 					// warp on top of target?
 					if (zone->HasWaterMap() && zone->watermap->InLiquid(tar_pos) || zone->IsWaterZone(tar_pos.z)) {
@@ -1776,7 +1788,16 @@ void Mob::AI_Process() {
 									}
 								}
 							}
-							RunTo(GetTarget()->GetX(), GetTarget()->GetY(), m_Navigation.z);
+
+                            // Run to last known mob location
+                            glm::vec3 dest_pos(m_LastKnownTargetPosition.x, m_LastKnownTargetPosition.y, m_Navigation.z);
+							RunTo(dest_pos.x, dest_pos.y, dest_pos.z);
+
+                            // If mob gets near destination and target is not in line of sight or (invisible to us and outside of combat range) then forget target and play emote
+                            if (DistanceSquared(my_loc, dest_pos) < 1.0f)
+                            {
+                                RemoveFromHateList(GetTarget());
+                            }
 
 							if (IsNPC())
 								CastToNPC()->SetNotCornered();

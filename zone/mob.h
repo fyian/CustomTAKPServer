@@ -1270,6 +1270,8 @@ protected:
 	int16 count_TempPet;
 	bool pet_owner_client; //Flags regular and pets as belonging to a client
 
+	glm::vec3 m_LastKnownTargetPosition;
+
 	glm::vec3 m_TargetLocation;
 	uint8 tar_ndx;
 	glm::vec3 m_DeltaV;
