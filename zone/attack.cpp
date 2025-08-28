@@ -1426,6 +1426,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	if(IsClient())
 		CastToClient()->GetExpLoss(killerMob, spell, exploss, killedby);
 
+    int currentMana = GetMana();
 	SetMana(GetMaxMana());
 
 	bool LeftCorpse = false;
@@ -1446,7 +1447,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			//m_epp.perAA = 0;	//reset to no AA exp on death.
 		}
 		
-		UnmemSpellAll(false);
+		//UnmemSpellAll(false);
 
 		if((RuleB(Character, LeaveCorpses) && GetLevel() >= RuleI(Character, DeathItemLossLevel)) || RuleB(Character, LeaveNakedCorpses))
 		{
@@ -1462,7 +1463,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			}
 
 			// creating the corpse takes the cash/items off the player too
-			auto new_corpse = new Corpse(this, exploss, killedby);
+			auto new_corpse = new Corpse(this, currentMana, killedby);
 
 			std::string tmp;
 			database.GetVariable("ServerType", tmp);
