@@ -1902,8 +1902,6 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 		float stat = GetSkillStat(skillid);
 		float skillup_modifier = RuleR(Skills, SkillUpModifier);
 
-        return true;
-
 		if(difficulty < 1)
 			difficulty = 1.0f;
 		if(difficulty > 28)
@@ -1913,6 +1911,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 		if(chance1 > 95)
 			chance1 = 95.0;
 
+        chance1 = 100;
 		if(zone->random.Real(0, 99) < chance1)
 		{
 
@@ -1924,6 +1923,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 
 			float chance2 = 100.0f - skillvalue;
 
+            chance2 = 100;
 			if(zone->random.Real(0, 99) < chance2)
 			{
 				SetSkill(skillid, GetRawSkill(skillid) + 1);
